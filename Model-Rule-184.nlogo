@@ -19,7 +19,11 @@ to setup
   set row max-pycor ; Start at the first row of the world
 
   setup-patches
-  draw-patches
+  ask patches with [pycor = row]
+  [
+    color-patch
+    set-velocity
+  ]
 end
 
 
@@ -27,7 +31,7 @@ to setup-patches
   ; Initialize the first row to a random configuration.
   ask patches with [pycor = row]
   [
-    ifelse ((random-float 100) < density) [set state 1] [set state 0]
+    ifelse ((random-float 100) < density) [set state true] [set state false]
   ]
 end
 
@@ -36,10 +40,7 @@ end
 ;;;;;;;;
 
 to go
-  if (row = min-pycor)
-  [
-    stop
-  ]
+  if (row = min-pycor)[ stop ]
   ask patches with [pycor = row]
     [do-rule]
   set row (row - 1)
@@ -50,37 +51,44 @@ end
 
 to do-rule
   ;; Ask the patches to apply rule 184.
-  let left-state? [state] of patch-at -1 0 ;; set to true if the state to the left is on
-  let right-state? [state] of patch-at 1 0  ;; set tot true if the patch on the right is on
+  let left-state [state] of patch-at -1 0 ;; set to true if the state to the left is on
+  let right-state [state] of patch-at 1 0  ;; set tot true if the patch on the right is on
 
   ;; each of these lines checks the local area and (possibly)
   ;; sets the lower cell according to the corresponding switch
   let new-value
-    (true and left-on?       and on?       and right-on?)          or
-    (false and left-on?       and on?       and (not right-on?))    or
-    (true and left-on?       and (not on?) and right-on?)          or
-    (true and left-on?       and (not on?) and (not right-on?))    or
-    (true and (not left-on?) and on?       and right-on?)          or
-    (false and (not left-on?) and on?       and (not right-on?))    or
-    (false and (not left-on?) and (not on?) and right-on?)          or
-    (false and (not left-on?) and (not on?) and (not right-on?))
-  ask patch-at 0 -1 [ set [state] new-value ] ;; Set the value of the patch on the next line to the new value.
+    (true and left-state       and state       and right-state)          or
+    (false and left-state       and state       and (not right-state))    or
+    (true and left-state       and (not state) and right-state)          or
+    (true and left-state       and (not state) and (not right-state))    or
+    (true and (not left-state) and state       and right-state)          or
+    (false and (not left-state) and state       and (not right-state))    or
+    (false and (not left-state) and (not state) and right-state)          or
+    (false and (not left-state) and (not state) and (not right-state))
+  ask patch-at 0 -1 [ set state new-value ] ;; Set the value of the patch on the next line to the new value.
 end
 
 ;;;;;;;;;;;;;
 ;; HELPERS ;;
 ;;;;;;;;;;;;;
 
-to draw-patches
-  ;; Colors the patches according to their state. 0 = black, 1 = purple.
-  ask patches with [pycor = row]
-  [
-    ifelse state = 1 [set pcolor 115] [set pcolor 0]
-  ]
-end
+
 
 to set-velocity
  ;; set the velocity of a patch. velocity is 1 if it moves on the next tick.
+ let right-state? [state] of patch-at 1 0 ;; the state of the patch to the right.
+ ifelse not right-state? and state [set plabel 1]
+ [
+   ifelse state
+   [set plabel 0]
+   [set plabel ""]
+ ]
+end
+
+to color-patch
+  ;; Color the patch according to the state
+  ifelse state [set pcolor 115] [set pcolor 0]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -103,8 +111,8 @@ GRAPHICS-WINDOW
 16
 -16
 16
-0
-0
+1
+1
 1
 ticks
 30.0
@@ -133,7 +141,7 @@ BUTTON
 71
 go
 go
-NIL
+T
 1
 T
 OBSERVER
@@ -152,7 +160,7 @@ density
 density
 0
 100
-50
+17
 1
 1
 %

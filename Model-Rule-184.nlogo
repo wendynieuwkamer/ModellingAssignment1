@@ -1,9 +1,10 @@
 globals [
   row ; row currently being operated on.
+  mean-flow ;; The mean flow of a run.
   ]
 patches-own [
   state ; the state of a cell, either true or false (on or off)
-  v ; The velocity of the cell. 1 if the patch on the right is off, 0 if that patch is on.
+  v ; The velocity of a cell. 1 if it moves on the next timestep.
   ]
 
 ;;;;;;;;;;;
@@ -29,10 +30,11 @@ end
 
 to setup-patches
   ; Initialize the first row to a random configuration.
-  ask patches with [pycor = row]
-  [
-    ifelse ((random-float 100) < density) [set state true] [set state false]
-  ]
+  let n world-width * density
+  ask n-of (floor n) patches with [pycor = row]
+    [set state true]
+  ask patches with [pycor = row and state = 0]
+  [set state false]
 end
 
 ;;;;;;;;
@@ -46,6 +48,7 @@ to go
   set row (row - 1)
   ask patches with [pycor = row]
     [ color-patch set-velocity ]
+  do-plots
   tick
 end
 
@@ -76,12 +79,11 @@ end
 
 to set-velocity
  ;; set the velocity of a patch. velocity is 1 if it moves on the next tick.
- let right-state? [state] of patch-at 1 0 ;; the state of the patch to the right.
- ifelse not right-state? and state [set plabel 1]
+ let right-state? [state]
+  of patch-at 1 0 ;; the state of the patch to the right.
+ ifelse not right-state? and state [set v 1]
  [
-   ifelse state
-   [set plabel 0]
-   [set plabel ""]
+   set v 0
  ]
 end
 
@@ -89,15 +91,61 @@ to color-patch
   ;; Color the patch according to the state
   ifelse state [set pcolor 115] [set pcolor 0]
 end
+
+to-report mean-flowrate
+  ;; Calculates and updates the current flow and mean flow.
+  report mean-flow
+end
+
+
+;;;;;;;;;;;;;;
+;; PLOTTING ;;
+;;;;;;;;;;;;;;
+
+
+to do-plots
+  ;; Flow is the sum of the veocity of all cars.
+  let flow 0
+  set-current-plot "Flow"
+  set-plot-x-range (ticks - world-height) ticks
+  set-plot-y-range -1 (density * world-width)
+  set-current-plot-pen "current"
+  set flow sum [v] of patches with [pycor = row]
+  plot flow
+  set-current-plot-pen "mean"
+  ifelse ticks = 0
+    [
+    set mean-flow flow
+    ]
+    [
+    set mean-flow (mean-flow * (ticks) + flow) / (ticks + 1)
+    ]
+  plot mean-flow
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
-210
+212
 10
-649
-470
-16
-16
-13.0
+727
+10046
+50
+1000
+5.0
 1
 10
 1
@@ -107,10 +155,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--16
-16
--16
-16
+-50
+50
+-1000
+1000
 1
 1
 1
@@ -159,23 +207,31 @@ SLIDER
 density
 density
 0
-100
-17
 1
 1
-%
+0.01
+1
+NIL
 HORIZONTAL
 
-SWITCH
-25
-148
-153
-181
-autocontinue
-autocontinue
-1
-1
--1000
+PLOT
+735
+10
+1404
+529
+Flow
+ticks
+flow
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"current" 1.0 0 -7500403 true "" ""
+"mean" 1.0 0 -2674135 true "" ""
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -524,6 +580,32 @@ NetLogo 5.3.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="1 Phase Transition" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>mean-flowrate</metric>
+    <steppedValueSet variable="density" first="0" step="0.05" last="1"/>
+    <enumeratedValueSet variable="world-width">
+      <value value="101"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="world-height">
+      <value value="2001"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="2 Undersampling" repetitions="3" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>mean-flowrate</metric>
+    <steppedValueSet variable="density" first="0" step="0.05" last="1"/>
+    <enumeratedValueSet variable="world-width">
+      <value value="101"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="world-height">
+      <value value="5"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default

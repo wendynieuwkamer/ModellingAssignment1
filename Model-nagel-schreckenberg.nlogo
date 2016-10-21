@@ -119,7 +119,7 @@ to do-plots
   ask patches [update-plot update-positions]
   set-current-plot "Flow"
   set-plot-x-range (ticks - 1000) ticks
-  set-plot-y-range 0 (5 * density * world-width)
+  set-plot-y-range -1 (vmax * density * world-width)
   set-current-plot-pen "current"
   ;; Flow is the sum of the velocities of all cars.
   set f sum [v] of patches with [v > -1]
@@ -144,7 +144,7 @@ end
 GRAPHICS-WINDOW
 15
 259
-1825
+1843
 308
 -1
 0
@@ -159,7 +159,7 @@ GRAPHICS-WINDOW
 1
 1
 0
-99
+100
 0
 0
 1
@@ -228,7 +228,7 @@ density
 density
 0
 1
-0.21
+0.5
 0.01
 1
 NIL
@@ -243,7 +243,7 @@ p
 p
 0
 1
-0.1
+1
 0.1
 1
 NIL
@@ -686,6 +686,47 @@ NetLogo 5.3.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="1 Phase Transition" repetitions="20" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2001"/>
+    <metric>mean-flowrate</metric>
+    <enumeratedValueSet variable="p">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="density" first="0" step="0.05" last="1"/>
+    <enumeratedValueSet variable="world-width">
+      <value value="101"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="2 Undersampling" repetitions="3" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="5"/>
+    <metric>mean-flowrate</metric>
+    <enumeratedValueSet variable="p">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="density" first="0" step="0.05" last="1"/>
+    <enumeratedValueSet variable="world-width">
+      <value value="101"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="3 Human error" repetitions="20" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2000"/>
+    <metric>mean-flowrate</metric>
+    <steppedValueSet variable="p" first="0" step="0.05" last="1"/>
+    <enumeratedValueSet variable="density">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="world-width">
+      <value value="101"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default

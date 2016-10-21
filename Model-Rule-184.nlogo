@@ -136,15 +136,14 @@ end
 
 
 
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 212
 10
 727
-10046
+96
 50
-1000
+5
 5.0
 1
 10
@@ -157,8 +156,8 @@ GRAPHICS-WINDOW
 1
 -50
 50
--1000
-1000
+-5
+5
 1
 1
 1
@@ -208,7 +207,7 @@ density
 density
 0
 1
-1
+0.75
 0.01
 1
 NIL
@@ -596,13 +595,14 @@ NetLogo 5.3.1
   <experiment name="2 Undersampling" repetitions="3" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
+    <timeLimit steps="5"/>
     <metric>mean-flowrate</metric>
     <steppedValueSet variable="density" first="0" step="0.05" last="1"/>
     <enumeratedValueSet variable="world-width">
       <value value="101"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="world-height">
-      <value value="5"/>
+      <value value="11"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
